@@ -1,0 +1,58 @@
+/Fetching the current record details and retrieving the necessary field information
+response = zoho.crm.getRecordById("Cases",case.get("Cases.ID").toLong());
+Name = response.get("Subject");
+Name = zoho.encryption.urlEncode(Name);
+Description = response.get("Description");
+Description = zoho.encryption.urlEncode(Description);
+Priority = response.get("Priority");
+Comments = response.get("Internal_Comments");
+Comments = zoho.encryption.urlEncode(Comments);
+dynamic_map = Map();
+/*Fetching the values for Portal ID and Project ID CRM variables which are obtained as part of the settings widget*/
+portalid = zoho.crm.getOrgVariable("xxx__Portal_Id");//The api name of the CRM variable for Portal_Id
+projectid = zoho.crm.getOrgVariable("xxx__Project_Id");//The api name of the CRM variable for Project_Id
+dynamic_map.put("portalid",portalid);
+dynamic_map.put("projectid",projectid);
+//Invoking the connector API to retrieve the users present in the project 
+resp1 = zoho.crm.invokeConnector("xxx.zohoprojects.getprojectusers",dynamic_map);
+response1 = resp1.get("response");
+users = response1.get("users");
+rolelist = List();
+/*retrieving the ID of the user with admin role in the project to be assigned as the person responsible for the task*/
+for each value in users
+{
+if(value.get("role") == "admin")
+{
+id = value.get("zpuid");
+}
+}
+dynamic_map = Map();
+portalid = zoho.crm.getOrgVariable("xxx__Portal_Id");
+projectid = zoho.crm.getOrgVariable("xxx__Project_Id");
+dynamic_map.put("portalid",portalid);
+dynamic_map.put("projectid",projectid);
+dynamic_map.put("name",Name);
+dynamic_map.put("description",Description);
+dynamic_map.put("priority",Priority);
+dynamic_map.put("person_responsible",id);
+/*Invoking the connector API with the necessary parameters passed to create a project task */
+resp = zoho.crm.invokeConnector("xxx.zohoprojects.createtask",dynamic_map);
+response2 = resp.get("response");
+tasks = response2.get("tasks");
+//Retrieving the task id from the response of create task API
+for each ids in tasks
+{
+id1 = ids.get("id");
+}
+dynamic_map = Map();
+portalid = zoho.crm.getOrgVariable("xxx__Portal_Id");
+projectid = zoho.crm.getOrgVariable("xxx__Project_Id");
+dynamic_map.put("portalid",portalid);
+dynamic_map.put("projectid",projectid);
+dynamic_map.put("taskid",id1);
+dynamic_map.put("content",Comments);
+//Invoking the connector API to add a comment to the task 
+response3= zoho.crm.invokeConnector("xxx.zohoprojects.addcommentfortask",dynamic_map);
+caseinfo = {"Solution":url};
+response4 = zoho.crm.updateRecord("Cases",case.get("Cases.ID").toLong(),caseinfo);
+return resp;
