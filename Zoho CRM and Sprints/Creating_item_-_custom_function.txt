@@ -1,0 +1,24 @@
+/*Fetching the description of the deal to be passed as the backlog item name while invoking the CREATE ITEM connector API */
+response = zoho.crm.getRecordById("Deals",deal.get("Deals.ID").toLong());
+Name = response.get("Deal_Name");
+Name = zoho.encryption.urlEncode(Name);
+Description = response.get("Description");
+Description = zoho.encryption.urlEncode(Description);
+dynamic_map = Map();
+//Fetching the parameters required for the invoking the CREATE ITEM connector API 
+teamid = zoho.crm.getOrgVariable("testing70__Team");
+projectid = zoho.crm.getOrgVariable("testing70__Project");
+backlogid = zoho.crm.getOrgVariable("testing70__Backlog_Id");
+itemtype = zoho.crm.getOrgVariable("testing70__Item_type");
+priorityid = zoho.crm.getOrgVariable("testing70__Priority_Id");
+//Mapping the parameters
+dynamic_map.put("teamid",teamid);
+dynamic_map.put("projectid",projectid);
+dynamic_map.put("backlogid",backlogid);
+dynamic_map.put("dealdesc",Description);
+dynamic_map.put("dealname",Name);
+dynamic_map.put("itemtype",itemtype);
+dynamic_map.put("priorityid",priorityid);
+/*Invoking the CREATE ITEM connector API to create a backlog item inside the respective team's project's backlog*/
+resp = zoho.crm.invokeConnector("xxx.zohosprints.createitem",dynamic_map);
+info resp;
