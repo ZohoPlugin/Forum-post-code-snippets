@@ -1,0 +1,49 @@
+/Retrieving the deal record and fetching the deal name, contact name and contact ID
+response = zoho.crm.getRecordById("Deals",deal.get("Deals.ID").toLong());
+dealname = response.get("Deal_Name");
+dealname = dealname.trim().toUpperCase();
+dealname = replaceAll(dealname," ","_");
+contact = response.get("Contact_Name");
+id = contact.get("id");
+// Retrieving the email ID of the contact associated with the deal by passing the id retrieved
+response1 = zoho.crm.getRecordById("Contacts",id);
+email = response1.get("Email");
+dynamic_map = Map();
+// Invoking the get account details API to fetch the account ID
+response2 = zoho.crm.invokeConnector("jssdkextension.zohomail.getaccountsdetails",dynamic_map);
+resp = response2.get("response");
+data = resp.get("data");
+for each item in data
+{
+zuid = item.get("zuid");
+info zuid;
+accountid = item.get("accountId");
+info accountid;
+}
+dynamic_map = Map();
+dynamic_map.put("accountId",accountid);
+dynamic_map.put("emailid",email);
+dynamic_map.put("dealname",dealname);
+// Invoking the search results API to get the emails associated with the deal and contact of the deal
+response3 = zoho.crm.invokeConnector("jssdkextension.zohomail.searchresults",dynamic_map);
+info response3;
+responsedata1 = response3.get("response");
+data1 = responsedata1.get("data");
+info data1;
+// Constructing the related list
+resp = "";
+count = 1;
+recordsXmlStr = "<record>";
+for each value in data1
+{
+recordsXmlStr = recordsXmlStr + "<row no='" + count + "'>";
+
+recordsXmlStr = recordsXmlStr + "<FL val='Subject'>" + value.get("subject") + "</FL>";
+recordsXmlStr = recordsXmlStr + "<FL val='Summary'>" + value.get("summary") + "</FL>";
+recordsXmlStr = recordsXmlStr + "<FL val='Sender'>" + value.get("sender") + "</FL>";
+recordsXmlStr = recordsXmlStr + "</row>";
+count = count + 1;
+}
+recordsXmlStr = recordsXmlStr + "</record>";
+resp = resp + recordsXmlStr;
+return resp;
