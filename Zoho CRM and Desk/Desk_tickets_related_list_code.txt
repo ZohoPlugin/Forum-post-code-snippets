@@ -1,14 +1,16 @@
-/Retrieving the record details and storing the email value
+//Retrieving the record details and storing the email value
 response = zoho.crm.getRecordById("Contacts",contact.get("Contacts.ID").toLong());
 Email = response.get("Email");
 orgid = zoho.crm.getOrgVariable("xxx__Orgid");
 dynamic_map = Map();
 dynamic_map.put("email",Email);
 dynamic_map.put("orgid",orgid);
+
 /*Invoking the search desk contacts api by passing the email id value retrieved from the get records*/
 resp = zoho.crm.invokeConnector("xxx.desk.searchcontacts",dynamic_map);
 responsedata = resp.get("response");
 data = responsedata.get("data");
+
 //Fetching the id of the desk contact
 for each value in data
 {
@@ -18,12 +20,14 @@ dynamic_map = Map();
 orgid = zoho.crm.getOrgVariable("xxx__Orgid");
 dynamic_map.put("contactid",id);
 dynamic_map.put("orgid",orgid);
+
 //Invoking the get tickets by contacts api by passing the contact id value retrieved 
 resp1 = zoho.crm.invokeConnector("xxx.desk.getticketsbycontact",dynamic_map);
 responsedata1 = resp1.get("response");
 data1 = responsedata1.get("data");
 resp = "";
 count = 1;
+
 //constructing the record for related list
 recordsXmlStr = "<record>";
 for each value in data1
